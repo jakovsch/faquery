@@ -1,0 +1,33 @@
+services:
+  bot:
+    build: .
+    depends_on:
+      - db
+      - api
+    environment:
+      - BOT_API_TOKEN
+      - BOT_PREFIX
+      - BOT_DESCRIPTION
+    volumes:
+      - bot:/data:rw
+    restart: unless-stopped
+  db:
+    image: ghcr.io/chroma-core/chroma:latest
+    environment:
+      - ANONYMIZED_TELEMETRY=False
+    volumes:
+      - embeddings:/chroma/chroma:rw
+    restart: unless-stopped
+  api:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-latest
+    environment:
+      - MODEL_ID=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+      - REVISION=main
+      - MAX_CLIENT_BATCH_SIZE=128
+    volumes:
+      - models:/data:rw
+    restart: unless-stopped
+volumes:
+  bot:
+  models:
+  embeddings:
